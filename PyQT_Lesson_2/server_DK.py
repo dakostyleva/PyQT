@@ -5,10 +5,10 @@ from socket import socket, AF_INET, SOCK_STREAM
 class Server():
     def __init__(self):
         self.address = ('', 10000)
-        self.messages = []
+        self.messages = {}
         self.clients = []
 
-    def read_messages(self, r_clients, all_clients):
+    def read_messages(self, r_clients):
         for sock in r_clients:
             try:
                 data = sock.recv(1024)
@@ -17,11 +17,10 @@ class Server():
                 self.messages[sock] = message['message']
             except:
                 print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
-                all_clients.remove(sock)
         return self.messages
 
 
-    def write_responses(self, requests, w_clients, all_clients):
+    def write_responses(self, requests, w_clients):
         for i in w_clients:
             for sock in requests:
                 try:
@@ -37,7 +36,6 @@ class Server():
                 except:
                     print('Клиент {} {} отключился'.format(i.fileno(), i.getpeername()))
                 i.close()
-                all_clients.remove(i)
 
 
     def mainloop(self):
@@ -58,9 +56,8 @@ class Server():
                 r, w, e = select.select(self.clients, self.clients, [], 0)
             except:
                 pass
-            requests = self.read_messages(r, self.clients)
-            self.write_responses(requests, w, self.clients)
-            #requests.clear()
+            requests = self.read_messages(r)
+            self.write_responses(requests, w)
 
 def main():
     server = Server()

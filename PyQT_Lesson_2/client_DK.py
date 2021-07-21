@@ -27,7 +27,7 @@ class ClientSender(threading.Thread):
                     print(f'Press m or q')
                     continue
             except:
-                print('error_write')
+                break
 
 
 class ClientReader(threading.Thread):
@@ -37,14 +37,14 @@ class ClientReader(threading.Thread):
 
     def run(self):
         while True:
-            #try:
-            data = self.socket.recv(1024)
-            json_message = data.decode('utf-8')
-            message = json.loads(json_message)
-            server_response = message['alert']
-            print(f'Message from chat: {server_response}')
-            #except:
-                #print('error_read')
+            try:
+                data = self.socket.recv(1024)
+                json_message = data.decode('utf-8')
+                message = json.loads(json_message)
+                server_response = message['alert']
+                print(f'Message from chat: {server_response}')
+            except:
+                break
 
 
 def main():
@@ -55,8 +55,7 @@ def main():
             print('Не удалось декодировать полученную Json строку.')
             exit(1)
         except (ConnectionRefusedError, ConnectionError):
-            print(
-                f'Не удалось подключиться к серверу, конечный компьютер отверг запрос на подключение.')
+            print(f'Не удалось подключиться к серверу.')
             exit(1)
         else:
             w_thread = ClientSender(sock)
